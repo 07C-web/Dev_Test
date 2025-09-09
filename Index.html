@@ -2,49 +2,57 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Testing_Dev</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/7.33.1/sweetalert2.min.js"></script>
+  <title>Absensi Lokasi Online - Dev Test</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
+
 <script>
 (function getLocation() {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(showPosition, showError);
   } else {
-    swal("Error", "Browser tidak mendukung geolocation", "error");
+    Swal.fire("Error", "Browser tidak mendukung geolocation", "error");
   }
 })();
 
 function showPosition(position) {
-  var lat = position.coords.latitude;
-  var lng = position.coords.longitude;
+  const lat = position.coords.latitude;
+  const lng = position.coords.longitude;
 
-  // ganti dengan URL Web App kamu
-  var url = "https://script.google.com/macros/s/AKfycbxtbWhxLynQNtJU5kUZ_ERU9OYXb5-skGUZARgzsISFHl4V6fDiij7rb_jFSZ2MW5oG/exec";
+  // Ganti dengan URL Web App Apps Script kamu
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxtbWhxLynQNtJU5kUZ_ERU9OYXb5-skGUZARgzsISFHl4V6fDiij7rb_jFSZ2MW5oG/exec";
 
-  fetch(url, {
+  fetch(APPS_SCRIPT_URL, {
     method: "POST",
     body: JSON.stringify({ lat: lat, lng: lng }),
     headers: { "Content-Type": "application/json" }
   })
-  .then(res => res.json())
+  .then(response => response.json())
   .then(data => {
-    swal({
-      title: "Absensi Berhasil",
-      text: "Lokasi berhasil direkam.\nTerimakasih!",
-      type: "success"
-    }).then(() => {
-      window.location.href = "http://07c-web.github.io.dev-test/";
-    });
+    if (data.status === "ok" || data.status === "success") {
+      Swal.fire({
+        title: "Absensi Berhasil",
+        text: "Lokasi berhasil direkam.\nTerimakasih!",
+        icon: "success"
+      }).then(() => {
+        // Redirect ke halaman GitHub Pages dev-test
+        window.location.href = "https://07c-web.github.io/dev-test/";
+      });
+    } else {
+      Swal.fire("Error", "Gagal menyimpan lokasi: " + (data.message || ""), "error");
+    }
   })
   .catch(err => {
-    swal("Error", "Gagal kirim data ke server", "error");
+    Swal.fire("Error", "Terjadi kesalahan saat mengirim data ke server", "error");
+    console.error(err);
   });
 }
 
 function showError(error) {
-  swal("Error", "Tidak bisa mengambil lokasi. Izinkan akses lokasi.", "error");
+  Swal.fire("Error", "Tidak bisa mengambil lokasi. Izinkan akses lokasi.", "error");
 }
 </script>
+
 </body>
 </html>
