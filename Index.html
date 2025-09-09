@@ -1,1 +1,58 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Absensi Lokasi Online</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/7.33.1/sweetalert2.min.css">
+</head>
+<body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/7.33.1/sweetalert2.min.js"></script>
+
+<script>
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycb.../exec"; // ganti dengan URL web app kamu
+
+  (function getLocation() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(showPosition, showError);
+    } else {
+      swal("Error", "Browser tidak mendukung geolocation", "error");
+    }
+  })();
+
+  function showPosition(position) {
+    var lat = position.coords.latitude;
+    var lng = position.coords.longitude;
+
+    // kirim ke Apps Script
+    fetch(APPS_SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ lat: lat, lng: lng })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === "success") {
+        swal({
+          title: "Absensi Berhasil",
+          text: "Lokasi Anda sudah direkam.\nTerima kasih!",
+          type: "success"
+        }).then(() => {
+          window.location.href = "https://07c-web.github.io/Rebru.id/";
+        });
+      } else {
+        swal("Error", "Gagal menyimpan lokasi: " + data.message, "error");
+      }
+    })
+    .catch(err => swal("Error", "Terjadi kesalahan: " + err.message, "error"));
+  }
+
+  function showError(error) {
+    swal("Error", "Tidak bisa mengambil lokasi. Izinkan akses lokasi.", "error");
+  }
+</script>
+</body>
+</html>
 
