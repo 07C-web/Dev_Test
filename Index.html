@@ -1,341 +1,234 @@
 <!DOCTYPE html>
 <html lang="id">
-  <head>
-    <meta charset="UTF-8" />
-    <!-- Encoding karakter -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Responsif HP -->
-    <title>Coffee Grounds Collection Log</title>
-    <style>
-      /* Reset dan font dasar */
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-        font-family: "Roboto", Arial, sans-serif;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Coffee Grounds Collection Log</title>
+  <style>
+    /* Reset dan font dasar */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Roboto", Arial, sans-serif;
+    }
+    body {
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      background: #f8f9fa;
+    }
+    header {
+      background: rgb(117, 173, 150);
+      padding: 15px;
+      text-align: right;
+      color: aliceblue;
+    }
+    main {
+      display: flex;
+      flex: 1;
+      padding: 30px;
+      justify-content: center;
+    }
+    .form-container {
+      background: white;
+      width: 100%;
+      max-width: 600px;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    .form-container h1 {
+      margin-bottom: 20px;
+      color: #202124;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: #5f6368;
+    }
+    .form-group input, 
+    .form-group select, 
+    .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      border-radius: 4px;
+      border: 1px solid #dadce0;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+    .form-group input:focus, 
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: rgb(152, 230, 197);
+    }
+    .form-group textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+    button.submit-btn {
+      background: rgb(117, 173, 150);
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+      font-size: 16px;
+    }
+    button.submit-btn:hover {
+      background: rgb(152, 230, 197);
+    }
+    /* Loading overlay */
+    .loading-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255,255,255,0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 8px;
+      display: none;
+    }
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid rgb(117, 173, 150);
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #333;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 5px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s;
+      z-index: 1000;
+    }
+    .toast.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>rebru.id</h1>
+  </header>
 
-      body {
-        margin: 0;
-        display: flex;
-        flex-direction: column; /* layout vertikal */
-        min-height: 100vh;
-      }
-
-      header {
-        background: rgb(117, 173, 150);
-        padding: 15px;
-        text-align: right;
-        color: aliceblue;
-      }
-
-      /* Konten utama horizontal */
-      main {
-        display: flex;
-        flex: 1;
-      }
-
-      .menu {
-        width: 15%;
-        background: lightgray;
-        padding: 30px;
-      }
-
-      .page {
-        flex: 1;
-        background: #f8f9fa; /* buat kontras dengan form */
-        padding: 30px;
-        display: flex;
-        justify-content: center; /* Tengah horizontal */
-      }
-
-      footer {
-        background: rgb(117, 173, 150);
-        padding: 20px;
-        text-align: center;
-      }
-
-      /* ===== Form Google Form Style ===== */
-      .form-container {
-        background-color: white;
-        width: 100%;
-        max-width: 600px;
-        padding: 30px;
-        border-radius: 8px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      }
-
-      .form-container h1 {
-        font-size: 24px;
-        margin-bottom: 10px;
-        color: #202124;
-      }
-
-      .form-container p.description {
-        font-size: 14px;
-        margin-bottom: 30px;
-        color: #5f6368;
-      }
-
-      .form-group {
-        margin-bottom: 20px;
-      }
-
-      .form-group label {
-        display: block;
-        margin-bottom: 6px;
-        font-size: 16px;
-        color: #5f6368;
-      }
-
-      .form-group input[type="text"],
-      .form-group input[type="email"],
-      .form-group input[type="number"],
-      .form-group textarea,
-      .form-group select {
-        width: 100%;
-        padding: 10px 12px;
-        border: 1px solid #dadce0;
-        border-radius: 4px;
-        font-size: 14px;
-        background-color: #fff;
-        transition: border-color 0.3s;
-      }
-
-      .form-group input:focus,
-      .form-group textarea:focus,
-      .form-group select:focus {
-        outline: none;
-        border-color: rgb(152, 230, 197);
-      }
-
-      .form-group textarea {
-        resize: vertical;
-        min-height: 80px;
-      }
-
-      .form-group .options label {
-        display: flex;
-        align-items: center;
-        margin-bottom: 8px;
-        font-size: 14px;
-        color: #252928;
-        cursor: pointer;
-      }
-
-      .form-group .options input {
-        margin-right: 10px;
-      }
-
-      .submit-btn {
-        background-color: rgb(117, 173, 150);
-        color: white;
-        padding: 12px 20px;
-        border: none;
-        border-radius: 4px;
-        font-size: 16px;
-        cursor: pointer;
-        transition: background-color 0.3s;
-
-        display: block; /* Supaya margin auto bekerja */
-        margin: 0 auto; /* Tengah horizontal */
-      }
-
-      .submit-btn:hover {
-        background-color: rgb(152, 230, 197);
-      }
-
-      /* Loading overlay */
-      .loading-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(255, 255, 255, 0.7);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        border-radius: 8px;
-        display: none; /* default hidden */
-      }
-      .spinner {
-        border: 4px solid #f3f3f3;
-        border-top: 4px solid rgb(117, 173, 150);
-        border-radius: 50%;
-        width: 30px;
-        height: 30px;
-        animation: spin 1s linear infinite;
-      }
-      @keyframes spin {
-        100% {
-          transform: rotate(360deg);
-        }
-      }
-
-      /* Toast notification */
-      .toast {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        background: #333;
-        color: #fff;
-        padding: 12px 20px;
-        border-radius: 5px;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.5s;
-        z-index: 1000;
-      }
-      .toast.show {
-        opacity: 1;
-        pointer-events: auto;
-      }
-    </style>
-  </head>
-  <body>
-    <header>
-      <h1>rebru.id</h1>
-    </header>
-
-    <main>
-      <div class="menu">
-        <h2>About Us</h2>
-        <ul>
-          <li>Beranda</li>
-          <li>Tentang</li>
-          <li>Contact</li>
-        </ul>
-      </div>
-
-      <div class="page">
-        <!-- Form mirip Google Form dimasukkan di sini -->
-        <div class="form-container">
-          <h1>Form Input Data</h1>
-          <p class="description">
-            Silakan isi form berikut untuk mencatat data kopi.
-          </p>
-
-          <!-- Email -->
-          <div class="form-group">
-            <label for="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              placeholder="Masukkan email"
-              required
-            />
-          </div>
-
-          <!-- Checkbox verifikasi -->
-          <div class="form-group">
-            <label>
-              <input type="checkbox" name="verifikasi_email" value="Ya" />
-              <i>Saya sudah memverifikasi email</i>
-            </label>
-          </div>
-
-          <!-- Nama Cafe -->
-          <div class="form-group">
-            <label for="cafe">Nama Cafe</label>
-            <select id="cafe" name="cafe" required>
-              <option value="">--Pilih--</option>
-              <option value="Kopi Api">Kopi Api</option>
-              <option value="Papio">Papio</option>
-              <option value="Dg Sija">Dg Sija</option>
-            </select>
-          </div>
-
-          <!-- Berat Timbangan -->
-          <div class="form-group">
-            <label for="berat">Berat Timbangan (kg)</label>
-            <input type="number" id="berat" name="berat" step="0.1" required />
-          </div>
-
-          <!-- Notes -->
-          <div class="form-group">
-            <label for="notes">Notes</label>
-            <textarea
-              id="notes"
-              name="notes"
-              rows="5"
-              placeholder="Tuliskan catatan"
-            ></textarea>
-          </div>
-
-          <!-- Submit -->
-          <button type="submit" class="submit-btn">Submit</button>
-
-          <div class="loading-overlay">
-            <div class="spinner"></div>
-          </div>
-          <div class="toast" id="toast"></div>
+  <main>
+    <div class="form-container">
+      <h1>Form Input Data</h1>
+      <form id="dataForm">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="Masukkan email" required />
         </div>
+
+        <div class="form-group">
+          <label>
+            <input type="checkbox" name="verifikasi_email" value="Ya" />
+            <i>Saya sudah memverifikasi email</i>
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label for="cafe">Nama Cafe</label>
+          <select id="cafe" name="cafe" required>
+            <option value="">--Pilih--</option>
+            <option value="Kopi Api">Kopi Api</option>
+            <option value="Papio">Papio</option>
+            <option value="Dg Sija">Dg Sija</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="berat">Berat Timbangan (kg)</label>
+          <input type="number" id="berat" name="berat" step="0.1" required />
+        </div>
+
+        <div class="form-group">
+          <label for="notes">Notes</label>
+          <textarea id="notes" name="notes" placeholder="Tuliskan catatan"></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn">Submit</button>
+      </form>
+
+      <div class="loading-overlay">
+        <div class="spinner"></div>
       </div>
-    </main>
+      <div class="toast" id="toast"></div>
+    </div>
+  </main>
 
-    <footer>
-      <p>Kritik & Saran</p>
-    </footer>
+  <footer>
+    <p>Kritik & Saran</p>
+  </footer>
 
-    <script>
-      const scriptURL =
-        "https://script.google.com/macros/s/AKfycbyMkDIQDcd2h4A88oI-InE_MuUtmrvQRsZwdlGfCt5d03Hp9bDOEnM2hWnDqN9hG9HQXQ/exec"; // URL Web App Apps Script
-      const form = document.getElementById("dataForm");
-      const overlay = document.querySelector(".loading-overlay");
-      const toast = document.getElementById("toast");
+  <script>
+    const scriptURL = "https://script.google.com/macros/s/AKfycbyMkDIQDcd2h4A88oI-InE_MuUtmrvQRsZwdlGfCt5d03Hp9bDOEnM2hWnDqN9hG9HQXQ/exec"; // Ganti dengan Web App URL
+    const form = document.getElementById("dataForm");
+    const overlay = document.querySelector(".loading-overlay");
+    const toast = document.getElementById("toast");
 
-      function showToast(msg, duration = 3000) {
-        toast.textContent = msg;
-        toast.classList.add("show");
-        setTimeout(() => toast.classList.remove("show"), duration);
-      }
+    function showToast(msg, duration=3000){
+      toast.textContent = msg;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), duration);
+    }
 
-      form.addEventListener("submit", function (e) {
-        e.preventDefault();
-        overlay.style.display = "flex"; // tampilkan spinner
+    form.addEventListener("submit", function(e){
+      e.preventDefault();
+      overlay.style.display = "flex";
 
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData);
-        data.verifikasi_email = form.querySelector(
-          'input[name="verifikasi_email"]'
-        ).checked
-          ? "Ya"
-          : "Tidak";
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData);
+      data.verifikasi_email = form.querySelector('input[name="verifikasi_email"]').checked ? "Ya" : "Tidak";
 
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(
-            (pos) => {
-              data.lat = pos.coords.latitude;
-              data.lng = pos.coords.longitude;
+      if(navigator.geolocation){
+        navigator.geolocation.getCurrentPosition(pos => {
+          data.lat = pos.coords.latitude;
+          data.lng = pos.coords.longitude;
 
-              fetch(scriptURL, {
-                method: "POST",
-                body: JSON.stringify(data),
-                headers: { "Content-Type": "application/json" },
-              })
-                .then((res) => res.json())
-                .then((res) => {
-                  overlay.style.display = "none";
-                  showToast(res.message);
-                  if (res.status === "success") form.reset();
-                })
-                .catch((err) => {
-                  overlay.style.display = "none";
-                  showToast("Terjadi kesalahan: " + err);
-                });
-            },
-            () => {
-              overlay.style.display = "none";
-              showToast("Lokasi tidak dapat diakses. Pastikan GPS aktif.");
-            }
-          );
-        } else {
+          fetch(scriptURL,{
+            method: "POST",
+            body: JSON.stringify(data),
+            headers: {"Content-Type": "application/json"}
+          })
+          .then(res => res.json())
+          .then(res => {
+            overlay.style.display = "none";
+            showToast(res.message);
+            if(res.status === "success") form.reset();
+          })
+          .catch(err => {
+            overlay.style.display = "none";
+            showToast("Terjadi kesalahan: " + err);
+          });
+        }, () => {
           overlay.style.display = "none";
-          showToast("Browser tidak mendukung geolocation.");
-        }
-      });
-    </script>
-  </body>
+          showToast("Lokasi tidak dapat diakses. Pastikan GPS aktif.");
+        });
+      } else {
+        overlay.style.display = "none";
+        showToast("Browser tidak mendukung geolocation.");
+      }
+    });
+  </script>
+</body>
 </html>
